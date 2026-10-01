@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Life in Weeks">
+<meta name="theme-color" content="#121a15">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Life in Weeks: Gently Terrifying</title>
+<style>
+:root{
+  --bg:#101713; --bg2:#16211b; --card:#1b2820; --line:#2a3b30;
+  --green:#7fb88f; --green-dim:#3d5c46; --green-faint:#24352a;
+  --orange:#f0a35e; --orange-soft:#c9824a; --text:#e8efe9; --muted:#9bb0a1;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Rounded","Segoe UI",sans-serif;overscroll-behavior:none}
+body{min-height:100vh;padding:calc(env(safe-area-inset-top) + 14px) 16px calc(env(safe-area-inset-bottom) + 90px);
+  background:radial-gradient(ellipse at top,#1d2e23 0%,var(--bg) 60%) fixed}
+h1{font-size:22px;font-weight:800;letter-spacing:-.3px}
+h1 span{color:var(--orange)}
+.sub{color:var(--muted);font-size:13px;margin-top:2px;font-style:italic}
+header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.gear{background:var(--card);border:1px solid var(--line);color:var(--text);width:40px;height:40px;border-radius:12px;font-size:20px}
+.gear:active,.btn:active,.tab:active{transform:scale(.94);filter:brightness(1.25)}
+.card{background:linear-gradient(160deg,var(--card),var(--bg2));border:1px solid var(--line);border-radius:20px;padding:18px;margin-bottom:14px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+.hero{text-align:center}
+.hero .label{color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:1.5px}
+.hero .big{font-size:64px;font-weight:900;color:var(--green);line-height:1.05;margin:6px 0;font-variant-numeric:tabular-nums;text-shadow:0 0 30px rgba(127,184,143,.25)}
+.hero .quip{color:var(--orange);font-size:14px;min-height:20px;transition:opacity .4s}
+.bar{height:14px;background:var(--green-faint);border-radius:10px;overflow:hidden;margin:16px 0 6px;position:relative}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--orange-soft),var(--orange));border-radius:10px;transition:width 1.6s cubic-bezier(.2,.8,.2,1)}
+.barlbl{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--bg2);border:1px solid var(--line);border-radius:14px;padding:12px 8px;text-align:center}
+.stat b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+.stat small{color:var(--muted);font-size:11px}
+.o b{color:var(--orange)} .g b{color:var(--green)}
+h2{font-size:15px;margin-bottom:10px;color:var(--text)}
+h2 em{color:var(--muted);font-weight:400;font-style:normal;font-size:12px}
+canvas{width:100%;display:block;touch-action:manipulation}
+.legend{display:flex;gap:14px;justify-content:center;font-size:12px;color:var(--muted);margin-top:10px;flex-wrap:wrap}
+.legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:var(--c)}
+.tip{margin-top:10px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--muted);min-height:42px}
+.tip b{color:var(--orange)}
+.list{list-style:none}
+.list li{display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line);font-size:14px}
+.list li:last-child{border:0}
+.list li span:last-child{color:var(--orange);font-weight:700;font-variant-numeric:tabular-nums}
+.ticker{font-size:26px;font-weight:800;color:var(--orange);text-align:center;font-variant-numeric:tabular-nums;margin:6px 0}
+.center{text-align:center;color:var(--muted);font-size:12px}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;gap:6px;padding:10px 14px calc(env(safe-area-inset-bottom) + 10px);background:rgba(16,23,19,.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);z-index:5}
+.tab{flex:1;background:none;border:0;color:var(--muted);font-size:11px;padding:6px 0;border-radius:12px}
+.tab .ic{font-size:20px;display:block;margin-bottom:2px}
+.tab.on{color:var(--orange);background:var(--green-faint)}
+.page{display:none;animation:fade .35s ease}
+.page.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:flex-end;z-index:20}
+.modal.on{display:flex}
+.sheet{width:100%;background:var(--bg2);border-top:1px solid var(--line);border-radius:22px 22px 0 0;padding:20px 18px calc(env(safe-area-inset-bottom) + 20px);animation:up .3s ease}
+@keyframes up{from{transform:translateY(100%)}to{transform:none}}
+label{display:block;font-size:13px;color:var(--muted);margin:14px 0 6px}
+input,select{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--text);font-size:16px;padding:12px;border-radius:12px;-webkit-appearance:none}
+.btn{width:100%;margin-top:18px;padding:14px;border:0;border-radius:14px;font-size:16px;font-weight:700;background:var(--orange);color:#1a120a}
+.btn.ghost{background:var(--card);color:var(--text);border:1px solid var(--line);margin-top:10px}
+.note{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.4}
+#rotate{position:fixed;inset:0;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:99;text-align:center;padding:30px;gap:12px}
+#rotate div{font-size:60px}
+@media (orientation:landscape) and (max-height:500px){#rotate{display:flex}}
+</style>
+</head>
+<body>
+
+<div id="rotate"><div>📱↩️</div><b>Please un-sideways your phone.</b><span class="sub">Time is linear. So is this app. Portrait only.</span></div>
+
+<header>
+  <div>
+    <h1>Life in Weeks<span>.</span></h1>
+    <div class="sub">Gently terrifying™</div>
+  </div>
+  <button class="gear" id="gearBtn" aria-label="Settings">⚙️</button>
+</header>
+
+<!-- HOME -->
+<section class="page on" id="p-home">
+  <div class="card hero">
+    <div class="label">Weeks remaining (statistically)</div>
+    <div class="big" id="remain">0</div>
+    <div class="quip" id="quip">Calculating your doom… gently.</div>
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="barlbl"><span id="pctLived">0% lived</span><span id="expYrs">of 76.5 yrs</span></div>
+  </div>
+
+  <div class="grid3" style="margin-bottom:14px">
+    <div class="stat o"><b id="lived">0</b><small>weeks lived</small></div>
+    <div class="stat g"><b id="total">0</b><small>weeks total</small></div>
+    <div class="stat o"><b id="age">0</b><small>years old</small></div>
+  </div>
+
+  <div class="card">
+    <h2>Live countdown <em>· it's moving. it's always moving.</em></h2>
+    <div class="ticker" id="ticker">—</div>
+    <div class="center">seconds left until your statistical expiration date</div>
+  </div>
+
+  <div class="card">
+    <h2>Remaining, roughly <em>· use them wisely</em></h2>
+    <ul class="list" id="roughList"></ul>
+  </div>
+</section>
+
+<!-- GRID -->
+<section class="page" id="p-grid">
+  <div class="card">
+    <h2>Your whole life <em>· 1 dot = 1 week · 1 row = 1 year</em></h2>
+    <canvas id="cv"></canvas>
+    <div class="legend">
+      <span style="--c:var(--orange)">Lived</span>
+      <span style="--c:#fff">This week</span>
+      <span style="--c:var(--green-dim)">Remaining</span>
+    </div>
+    <div class="tip" id="tip">👆 Tap any dot to see what week it is (or was, or might be).</div>
+  </div>
+</section>
+
+<!-- MILESTONES -->
+<section class="page" id="p-miles">
+  <div class="card">
+    <h2>Milestones <em>· the ones ahead</em></h2>
+    <ul class="list" id="mileList"></ul>
+  </div>
+  <div class="card">
+    <h2>Fun facts <em>· "fun"</em></h2>
+    <ul class="list" id="factList"></ul>
+  </div>
+  <div class="card">
+    <div class="sub" id="pep" style="font-style:normal;color:var(--green);text-align:center;font-size:15px;line-height:1.5"></div>
+  </div>
+</section>
+
+<nav class="tabs">
+  <button class="tab on" data-p="home"><span class="ic">⏳</span>Countdown</button>
+  <button class="tab" data-p="grid"><span class="ic">🟧</span>Life Grid</button>
+  <button class="tab" data-p="miles"><span class="ic">🏁</span>Milestones</button>
+</nav>
+
+<!-- SETTINGS -->
+<div class="modal" id="modal">
+  <div class="sheet">
+    <h2>Settings <em>· tweak your fate</em></h2>
+    <label>Birthday</label>
+    <input type="date" id="inBday">
+    <label>Life expectancy (years)</label>
+    <input type="number" id="inLE" step="0.1" min="1" max="130">
+    <div class="note">Default: 76.5 years — U.S. male life expectancy at birth (CDC/NCHS, 2024 data). Eat a vegetable and feel free to bump it up a little.</div>
+    <button class="btn" id="saveBtn">Save my fate</button>
+    <button class="btn ghost" id="resetBtn">Reset to defaults</button>
+    <button class="btn ghost" id="closeBtn">Close</button>
+  </div>
+</div>
+
+<script>
+const DEFAULTS={bday:"1992-06-30",le:76.5};
+const WEEK=7*864e5, YEAR=365.2425*864e5;
+let S=Object.assign({},DEFAULTS,JSON.parse(localStorage.getItem("liw")||"{}"));
+const $=id=>document.getElementById(id);
+const fmt=n=>Math.round(n).toLocaleString();
+
+const QUIPS=[
+ "No pressure. 🙂","Each one is a little gift. With a timer on it.",
+ "That's fewer than the number of emails in your inbox.","Go call your mom. Seriously.",
+ "Hydrate. It probably helps.","Every Monday counts. Unfortunately.",
+ "Plenty of time! (Not unlimited though.)","You've got this. For now.",
+ "Statistically speaking, nap responsibly.","The dots don't refill. Just saying.",
+ "Spend one of these doing something weird.","Your future self says: stretch."
+];
+const PEP=[
+ "Fear not, mortal. A week is 168 hours. That's a LOT of snacks.",
+ "Gently terrifying, yes — but mostly a reminder that this week is a good one to do the thing.",
+ "You're not running out of time. You're running INTO it. (Okay, both.)",
+ "Pro tip: weeks with adventures in them feel longer. Science-ish."
+];
+
+function calc(){
+  const b=new Date(S.bday+"T00:00:00"), now=new Date();
+  const ms=now-b, end=new Date(b.getTime()+S.le*YEAR);
+  const total=Math.round(S.le*YEAR/WEEK);
+  const lived=Math.floor(ms/WEEK);
+  return {b,now,end,total,lived,remain:Math.max(0,total-lived),ageY:ms/YEAR,msLeft:end-now};
+}
+
+function countUp(el,to,dur=1400){
+  const t0=performance.now();
+  (function f(t){const p=Math.min(1,(t-t0)/dur),e=1-Math.pow(1-p,3);
+    el.textContent=fmt(to*e); if(p<1) requestAnimationFrame(f);})(t0);
+}
+
+function render(){
+  const c=calc();
+  countUp($("remain"),c.remain); countUp($("lived"),c.lived); countUp($("total"),c.total,1000);
+  $("age").textContent=Math.floor(c.ageY);
+  const pct=Math.min(100,c.lived/c.total*100);
+  setTimeout(()=>$("barFill").style.width=pct+"%",100);
+  $("pctLived").textContent=pct.toFixed(1)+"% lived";
+  $("expYrs").textContent="of "+S.le+" yrs";
+  if(c.remain===0) $("quip").textContent="🎉 Bonus round! You've beaten the average. Everything is extra credit now.";
+
+  const wl=c.remain, yl=Math.max(0,c.msLeft/YEAR);
+  const rough=[
+   ["🌞 Summers",fmt(yl)],["🦃 Thanksgivings",fmt(yl)],["🎂 Birthdays",fmt(yl)],
+   ["🛋️ Weekends",fmt(wl)],["😩 Mondays",fmt(wl)],["🌕 Full moons",fmt(yl*12.37)],
+   ["🍕 Pizza nights (1/wk)",fmt(wl)],["😴 Nights of sleep",fmt(c.msLeft/864e5)],
+   ["💓 Heartbeats (~70 bpm)",(c.msLeft/6e4*70/1e9).toFixed(2)+" billion"]
+  ];
+  $("roughList").innerHTML=rough.map(r=>`<li><span>${r[0]}</span><span>${r[1]}</span></li>`).join("");
+
+  // milestones
+  const miles=[];
+  const nb=new Date(c.b); nb.setFullYear(c.now.getFullYear());
+  if(nb<=c.now) nb.setFullYear(nb.getFullYear()+1);
+  const nextAge=nb.getFullYear()-c.b.getFullYear();
+  miles.push([`🎂 Next birthday (${nextAge})`,Math.ceil((nb-c.now)/WEEK)+" wks"]);
+  [40,50,60,65,70].forEach(a=>{const d=new Date(c.b);d.setFullYear(c.b.getFullYear()+a);
+    if(d>c.now) miles.push([`🏁 Turning ${a}`,fmt((d-c.now)/WEEK)+" wks"]);});
+  const half=new Date(c.b.getTime()+(c.end-c.b)/2);
+  miles.push(half>c.now?["⚖️ Halfway point",fmt((half-c.now)/WEEK)+" wks"]:["⚖️ Halfway point","passed "+half.toLocaleDateString(undefined,{month:"short",year:"numeric"})]);
+  miles.push(["🪦 Statistical finish line",c.end.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})]);
+  const ny=new Date(c.now.getFullYear()+1,0,1);
+  miles.push(["🎆 Weeks left this year",Math.ceil((ny-c.now)/WEEK)]);
+  $("mileList").innerHTML=miles.map(r=>`<li><span>${r[0]}</span><span>${r[1]}</span></li>`).join("");
+
+  const daysL=(c.now-c.b)/864e5;
+  const facts=[
+   ["📅 Days lived",fmt(daysL)],["⏰ Hours lived",fmt(daysL*24)],
+   ["🌍 Laps around the sun",(c.ageY).toFixed(2)],
+   ["🔁 Times you've said 'where did the week go'","~"+fmt(c.lived/3)],
+   ["💤 Years spent asleep (est.)",(c.ageY/3).toFixed(1)]
+  ];
+  $("factList").innerHTML=facts.map(r=>`<li><span>${r[0]}</span><span>${r[1]}</span></li>`).join("");
+  $("pep").textContent=PEP[Math.floor(Math.random()*PEP.length)];
+  drawGrid();
+}
+
+// quips
+let qi=Math.floor(Math.random()*QUIPS.length);
+setInterval(()=>{if(calc().remain===0)return;const q=$("quip");q.style.opacity=0;
+  setTimeout(()=>{qi=(qi+1)%QUIPS.length;q.textContent=QUIPS[qi];q.style.opacity=1},400)},5000);
+setTimeout(()=>{if(calc().remain>0)$("quip").textContent=QUIPS[qi]},1500);
+
+// ticker
+setInterval(()=>{const c=calc();$("ticker").textContent=c.msLeft>0?fmt(c.msLeft/1000):"∞ bonus seconds"},1000);
+
+// grid
+const COLS=52; let geo={};
+function drawGrid(){
+  const cv=$("cv"), c=calc(), dpr=window.devicePixelRatio||1;
+  const w=cv.parentElement.clientWidth-36, labelW=22;
+  if(w<=0) return;
+  const cell=(w-labelW)/COLS, rows=Math.ceil(Math.max(c.total,c.lived+1)/COLS);
+  const h=rows*cell;
+  cv.style.height=h+"px"; cv.width=w*dpr; cv.height=h*dpr;
+  const x=cv.getContext("2d"); x.scale(dpr,dpr); x.clearRect(0,0,w,h);
+  geo={cell,labelW,rows,c};
+  const r=Math.max(1,cell*0.36), css=getComputedStyle(document.documentElement);
+  const O=css.getPropertyValue("--orange").trim(), G=css.getPropertyValue("--green-dim").trim();
+  x.font=`${Math.max(7,cell*0.95)}px -apple-system`; x.fillStyle="#6f8577"; x.textAlign="right"; x.textBaseline="middle";
+  for(let i=0;i<rows*COLS;i++){
+    const row=Math.floor(i/COLS), col=i%COLS;
+    if(col===0 && row%5===0) {x.fillStyle="#6f8577"; x.fillText(row,labelW-4,row*cell+cell/2);}
+    if(i>=c.total && i>c.lived) continue;
+    const cx=labelW+col*cell+cell/2, cy=row*cell+cell/2;
+    x.beginPath(); x.arc(cx,cy,r,0,7);
+    if(i<c.lived) x.fillStyle=O; else if(i===c.lived) x.fillStyle="#fff"; else x.fillStyle=G;
+    x.fill();
+  }
+  // glow current week
+  const i=c.lived, cx=labelW+(i%COLS)*cell+cell/2, cy=Math.floor(i/COLS)*cell+cell/2;
+  x.beginPath(); x.arc(cx,cy,r*2.2,0,7); x.strokeStyle="rgba(240,163,94,.8)"; x.lineWidth=1.2; x.stroke();
+}
+$("cv").addEventListener("click",e=>{
+  const rc=e.target.getBoundingClientRect(), px=e.clientX-rc.left-geo.labelW, py=e.clientY-rc.top;
+  if(px<0) return;
+  const col=Math.floor(px/geo.cell), row=Math.floor(py/geo.cell), i=row*COLS+col, c=geo.c;
+  if(col>=COLS||i>=Math.max(c.total,c.lived+1)) return;
+  const st=new Date(c.b.getTime()+i*WEEK), en=new Date(st.getTime()+6*864e5);
+  const f=d=>d.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"});
+  let msg=`<b>Week #${fmt(i+1)}</b> · ${f(st)} – ${f(en)} · age ~${Math.floor(i*WEEK/YEAR)}<br>`;
+  if(i<c.lived) msg+=["Already spent. Hope it was fun. 🧡","Gone, but not forgotten. Probably forgotten.","A classic. Never to be repeated."][i%3];
+  else if(i===c.lived) msg+="👉 THIS week. The only one you can actually use right now.";
+  else msg+=["Still in the box. Unwrapped. 🎁","Future you's problem. And opportunity.","Not guaranteed, but highly hoped for."][i%3];
+  $("tip").innerHTML=msg;
+});
+
+// tabs
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on")); t.classList.add("on");
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("on"));
+  $("p-"+t.dataset.p).classList.add("on"); window.scrollTo(0,0);
+  if(t.dataset.p==="grid") requestAnimationFrame(drawGrid);
+});
+
+// settings
+$("gearBtn").onclick=()=>{$("inBday").value=S.bday;$("inLE").value=S.le;$("modal").classList.add("on")};
+$("closeBtn").onclick=()=>$("modal").classList.remove("on");
+$("modal").onclick=e=>{if(e.target.id==="modal")$("modal").classList.remove("on")};
+$("saveBtn").onclick=()=>{
+  const b=$("inBday").value, le=parseFloat($("inLE").value);
+  if(!b||!(le>0)) return alert("Need a birthday and a positive number of years. Immortality not supported (yet).");
+  S={bday:b,le}; localStorage.setItem("liw",JSON.stringify(S)); $("modal").classList.remove("on"); render();
+};
+$("resetBtn").onclick=()=>{S=Object.assign({},DEFAULTS);localStorage.removeItem("liw");$("inBday").value=S.bday;$("inLE").value=S.le;render();$("modal").classList.remove("on")};
+
+window.addEventListener("resize",()=>requestAnimationFrame(drawGrid));
+try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock("portrait").catch(()=>{})}catch(e){}
+if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js");
+render();
+</script>
+</body>
+</html>
